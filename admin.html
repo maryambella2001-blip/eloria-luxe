@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Eloria Luxe</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0a0a0a; padding: 30px; margin: 0; color: #f5f0e1; }
+        .container { max-width: 900px; margin: auto; background: #161616; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.3); }
+        h1 { text-align: center; background: linear-gradient(135deg, #D4AF37, #F5E6A8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h3 { margin-top: 25px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 8px; color: #D4AF37; }
+        .form-group { margin-bottom: 15px; }
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #0a0a0a; color: #f5f0e1; }
+        button { background: linear-gradient(135deg, #D4AF37, #B8860B); color: #0a0a0a; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        button:hover:not(:disabled) { opacity: 0.9; }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .product-item { background: #0a0a0a; padding: 15px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(212,175,55,0.2); }
+        .delete-btn { background: #c1121f; color: white; padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .login-box { max-width: 400px; margin: 80px auto; background: #161616; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid rgba(212,175,55,0.3); }
+        .status { padding: 12px; border-radius: 8px; margin: 15px 0; text-align: center; font-weight: bold; }
+        .status.loading { background: #3a3010; color: #D4AF37; }
+        .status.success { background: #1a3a1a; color: #6bcf6b; }
+        .status.error { background: #3a1a1a; color: #ff6b6b; }
+        .small { font-size: 12px; color: #c9b896; }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(212,175,55,0.3); border-top-color: #D4AF37; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        img.product-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(212,175,55,0.3); }
+        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10,10,10,0.85); display: none; z-index: 9999; align-items: center; justify-content: center; }
+        .overlay.show { display: flex; }
+        .overlay .msg { background: linear-gradient(135deg, #D4AF37, #B8860B); color: #0a0a0a; padding: 20px 30px; border-radius: 10px; font-weight: bold; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        a { color: #D4AF37; }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay">
+        <div class="msg"><span class="spinner"></span> &nbsp;<span id="overlay-msg">Processing...</span></div>
+    </div>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>👑 Admin Panel</h2>
+            <p style="color:#c9b896;">Eloria Luxe</p>
+            <p>Enter Password</p>
+            <input type="password" id="password" placeholder="Password" style="margin: 15px 0; width: 80%; padding: 10px; border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; background: #0a0a0a; color: #f5f0e1;" onkeypress="if(event.key==='Enter') checkPassword()">
+            <br>
+            <button onclick="checkPassword()">Login</button>
+        </div>
+    </div>
+
+    <div id="token-screen" style="display: none;">
+        <div class="login-box">
+            <h2>🔑 GitHub Setup</h2>
+            <p>Paste your GitHub Token:</p>
+            <div style="text-align: left; font-size: 13px; color: #c9b896; margin: 20px 0; line-height: 1.6;">
+                1. Go to <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a><br>
+                2. Generate new token (classic)<br>
+                3. Check <strong>"repo"</strong><br>
+                4. Copy token (starts with <code>ghp_</code>)
+            </div>
+            <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxx" style="margin: 10px 0; width: 80%; padding: 10px; border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; background: #0a0a0a; color: #f5f0e1;">
+            <br>
+            <button onclick="saveToken()">Save &amp; Continue</button>
+        </div>
+    </div>
+
+    <div id="admin-panel" style="display: none;">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                <h1 style="margin: 0;">👑 Eloria Luxe</h1>
+                <div>
+                    <a href="index.html" style="color:#c9b896; text-decoration: none;">← View Site</a>
+                    &nbsp;|&nbsp;
+                    <a href="#" onclick="logoutToken(); return false;" style="color:#c1121f; text-decoration: none;">Logout</a>
+                </div>
+            </div>
+
+            <div id="status-box"></div>
+            
+            <h3>➕ Add New Fragrance</h3>
+            <div class="form-group">
+                <label>Fragrance Name</label>
+                <input type="text" id="productName" placeholder="Royal Oud">
+            </div>
+            <div class="form-group">
+                <label>Price (DH)</label>
+                <input type="number" id="productPrice" placeholder="299">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="productCategory">
+                    <option value="men">👨 Men</option>
+                    <option value="women">👩 Women</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Product Image</label>
+                <input type="file" id="productImage" accept="image/*">
+                <small class="small">Upload an image</small>
+            </div>
+            
+            <button id="addBtn" onclick="addProduct()">⬆️ Add Product to GitHub</button>
+
+            <div class="product-list" style="margin-top: 30px;">
+                <h3>📋 Current Fragrances <span id="product-count" class="small"></span></h3>
+                <button onclick="loadProducts()" style="font-size:12px;padding:8px 15px;margin-bottom:15px;">🔄 Refresh List</button>
+                <div id="productList"><p class="small">Loading...</p></div>
+            </div>
+
+            <br>
+            <button id="clearBtn" onclick="clearAllProducts()" style="background: #c1121f; color: white;">🗑️ Delete All Products</button>
+        </div>
+    </div>
+
+    <script>
+        const PASSWORD = "admin123"; // ← غير كلمة السر هنا
+        // ⚠️ خاصك تبدل maryambella2001-blip و REPO برابط repo ديالك
+        const CONFIG = {
+            owner: "maryambella2001-blip",
+            repo: "eloria-luxe",
+            branch: "main",
+            productsFile: "products.json",
+            imagesFolder: "images"
+        };
+
+        let busy = false;
+        async function withLock(msg, fn) {
+            if (busy) { showStatus("⏳ Another operation in progress...", "loading"); return; }
+            busy = true;
+            showOverlay(msg);
+            document.querySelectorAll("button").forEach(b => b.disabled = true);
+            try { return await fn(); }
+            finally { busy = false; hideOverlay(); document.querySelectorAll("button").forEach(b => b.disabled = false); }
+        }
+        function showOverlay(msg) { document.getElementById("overlay-msg").textContent = msg || "Processing..."; document.getElementById("overlay").classList.add("show"); }
+        function hideOverlay() { document.getElementById("overlay").classList.remove("show"); }
+
+        function getToken() { return localStorage.getItem("eloria_github_token") || ""; }
+        function saveToken() {
+            const token = document.getElementById("tokenInput").value.trim();
+            if (!token) { alert("Please paste your token!"); return; }
+            localStorage.setItem("eloria_github_token", token);
+            showAdminPanel();
+        }
+        function logoutToken() { if (confirm("Remove token?")) { localStorage.removeItem("eloria_github_token"); location.reload(); } }
+
+        function checkPassword() {
+            const pass = document.getElementById("password").value;
+            if (pass === PASSWORD) {
+                if (getToken()) showAdminPanel();
+                else { document.getElementById("login-screen").style.display = "none"; document.getElementById("token-screen").style.display = "block"; }
+            } else alert("Wrong password!");
+        }
+        function showAdminPanel() {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("token-screen").style.display = "none";
+            document.getElementById("admin-panel").style.display = "block";
+            loadProducts();
+        }
+        function showStatus(msg, type) { document.getElementById("status-box").innerHTML = msg ? `<div class="status ${type}">${msg}</div>` : ""; }
+
+        async function githubGet(path) {
+            const token = getToken();
+            const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}&t=${Date.now()}`;
+            for (let i = 1; i <= 4; i++) {
+                try {
+                    const res = await fetch(url, { cache: "no-store", headers: { "Authorization": `Bearer ${token}`, "Accept": "application/vnd.github+json" } });
+                    if (res.status === 404) return null;
+                    if (!res.ok) throw Object.assign(new Error(`HTTP ${res.status}`), { status: res.status });
+                    return await res.json();
+                } catch (e) { if (i === 4 || (e.status && e.status < 500 && e.status !== 0)) throw e; await new Promise(r => setTimeout(r, 1500 * i)); }
+            }
+        }
+        async function githubPut(path, contentBase64, message, sha) {
+            const token = getToken();
+            const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`;
+            const body = { message, content: contentBase64, branch: CONFIG.branch };
+            if (sha) body.sha = sha;
+            const res = await fetch(url, { method: "PUT", cache: "no-store", headers: { "Authorization": `Bearer ${token}`, "Accept": "application/vnd.github+json", "Content-Type": "application/json" }, body: JSON.stringify(body) });
+            if (!res.ok) { const err = await res.json().catch(() => ({})); const e = new Error(`PUT ${res.status} - ${err.message||""}`); e.status = res.status; throw e; }
+            return await res.json();
+        }
+        async function githubPutRaw(path, contentBase64, message) {
+            for (let i = 1; i <= 4; i++) {
+                try { return await githubPut(path, contentBase64, message); }
+                catch (e) { if (i === 4 || (e.status && e.status < 500)) throw e; showOverlay(`Uploading image... retry ${i}/4`); await new Promise(r => setTimeout(r, 2000 * i)); }
+            }
+        }
+        async function githubDelete(path, sha, message) {
+            const token = getToken();
+            const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`;
+            const res = await fetch(url, { method: "DELETE", cache: "no-store", headers: { "Authorization": `Bearer ${token}`, "Accept": "application/vnd.github+json", "Content-Type": "application/json" }, body: JSON.stringify({ message, sha, branch: CONFIG.branch }) });
+            if (!res.ok) { const e = new Error(`DELETE ${res.status}`); e.status = res.status; throw e; }
+        }
+
+        function fileToBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = (e) => resolve(e.target.result.split(",")[1]); reader.onerror = reject; reader.readAsDataURL(file); }); }
+        function strToBase64(str) { return btoa(unescape(encodeURIComponent(str))); }
+        function base64ToStr(b64) { return decodeURIComponent(escape(atob(b64))); }
+
+        async function readProducts() {
+            const data = await githubGet(CONFIG.productsFile);
+            if (!data) return { products: [], sha: null };
+            return { products: JSON.parse(base64ToStr(data.content.replace(/\n/g, ""))), sha: data.sha };
+        }
+        async function writeProducts(modifyFn) {
+            for (let attempt = 1; attempt <= 6; attempt++) {
+                const { products, sha } = await readProducts();
+                const updated = modifyFn(products.map(p => ({ ...p })));
+                try {
+                    const content = strToBase64(JSON.stringify(updated, null, 2));
+                    const result = await githubPut(CONFIG.productsFile, content, `Update products (${attempt})`, sha);
+                    await new Promise(r => setTimeout(r, 800));
+                    const verify = await readProducts();
+                    if (JSON.stringify(verify.products) === JSON.stringify(updated)) return result;
+                    throw new Error("verify mismatch");
+                } catch (e) {
+                    const retry = e.status >= 500 || e.status === 409 || e.status === 422 || e.message.includes("verify") || e.message.includes("Failed to fetch");
+                    if (!retry || attempt === 6) throw e;
+                    showOverlay(`Retrying... ${attempt + 1}/6`);
+                    await new Promise(r => setTimeout(r, 2000));
+                }
+            }
+        }
+
+        async function addProduct() {
+            const name = document.getElementById("productName").value.trim();
+            const price = document.getElementById("productPrice").value;
+            if (!name) { alert("Enter the fragrance name!"); return; }
+            if (!price || parseInt(price) <= 0) { alert("Enter a valid price!"); return; }
+
+            await withLock("Adding fragrance...", async () => {
+                try {
+                    let imagePath = "";
+                    const capturedName = name;
+                    const capturedPrice = parseInt(price);
+                    const capturedCategory = document.getElementById("productCategory").value;
+                    const fileInput = document.getElementById("productImage");
+
+                    if (fileInput.files.length > 0) {
+                        const file = fileInput.files[0];
+                        const ext = (file.name.split(".").pop() || "jpg").toLowerCase().substring(0, 4);
+                        const fileName = `product_${Date.now()}_${Math.floor(Math.random()*1000)}.${ext}`;
+                        imagePath = `${CONFIG.imagesFolder}/${fileName}`;
+                    }
+
+                    showStatus('<span class="spinner"></span> Saving fragrance...', "loading");
+                    await writeProducts(list => { list.push({ name: capturedName, price: capturedPrice, image: imagePath, category: capturedCategory }); return list; });
+
+                    if (imagePath) {
+                        try {
+                            showStatus('<span class="spinner"></span> Uploading image...', "loading");
+                            const base64 = await fileToBase64(fileInput.files[0]);
+                            let verified = false;
+                            for (let t = 1; t <= 3; t++) {
+                                await githubPutRaw(imagePath, base64, `Add image (${t})`);
+                                await new Promise(r => setTimeout(r, 1500));
+                                if (await githubGet(imagePath)) { verified = true; break; }
+                            }
+                            if (!verified) showStatus("⚠️ <strong>" + capturedName + "</strong> added! But image failed. Try again later.", "loading");
+                            else showStatus("✅ <strong>" + capturedName + "</strong> added with image!", "success");
+                        } catch (imgErr) { showStatus("⚠️ <strong>" + capturedName + "</strong> added! But image failed.", "loading"); }
+                    } else {
+                        showStatus("✅ <strong>" + capturedName + "</strong> added!", "success");
+                    }
+
+                    document.getElementById("productName").value = "";
+                    document.getElementById("productPrice").value = "";
+                    document.getElementById("productImage").value = "";
+                    await loadProducts();
+                } catch (error) { console.error(error); showStatus("❌ Error: " + error.message, "error"); }
+            });
+        }
+
+        async function deleteProduct(index) {
+            if (!confirm("Delete this fragrance?")) return;
+            await withLock("Deleting...", async () => {
+                try {
+                    const { products } = await readProducts();
+                    const product = products[index];
+                    if (!product) { showStatus("❌ Not found.", "error"); return; }
+                    if (product.image && product.image.startsWith(CONFIG.imagesFolder + "/")) {
+                        try { const imgData = await githubGet(product.image); if (imgData) await githubDelete(product.image, imgData.sha, "Delete image"); }
+                        catch (e) { console.warn("Image delete skipped:", e.message); }
+                    }
+                    const tName = product.name, tImage = product.image;
+                    await writeProducts(list => { const i = list.findIndex(p => p.name === tName && p.image === tImage); if (i !== -1) list.splice(i, 1); return list; });
+                    showStatus("✅ Deleted!", "success");
+                    await loadProducts();
+                } catch (error) { console.error(error); showStatus("❌ Error: " + error.message, "error"); }
+            });
+        }
+
+        async function clearAllProducts() {
+            if (!confirm("Delete ALL fragrances? This cannot be undone!")) return;
+            await withLock("Deleting all...", async () => {
+                try {
+                    const { products } = await readProducts();
+                    for (const product of products) {
+                        if (product.image && product.image.startsWith(CONFIG.imagesFolder + "/")) {
+                            try { const imgData = await githubGet(product.image); if (imgData) await githubDelete(product.image, imgData.sha, "Delete image"); } catch (e) {}
+                        }
+                    }
+                    await writeProducts(() => []);
+                    showStatus("✅ All deleted!", "success");
+                    await loadProducts();
+                } catch (error) { console.error(error); showStatus("❌ Error: " + error.message, "error"); }
+            });
+        }
+
+        async function loadProducts() {
+            const container = document.getElementById("productList");
+            const countEl = document.getElementById("product-count");
+            container.innerHTML = '<p class="small"><span class="spinner"></span> Loading...</p>';
+            try {
+                const { products } = await readProducts();
+                countEl.textContent = `(${products.length})`;
+                if (products.length === 0) { container.innerHTML = "<p class='small'>No fragrances yet. Add one above! 👆</p>"; return; }
+                container.innerHTML = products.map((product, index) => `
+                    <div class="product-item">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            ${product.image ? `<img src="${product.image}" class="product-thumb" onerror="this.style.display='none'">` : `<div style="width:60px;height:60px;background:rgba(212,175,55,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;">👑</div>`}
+                            <div>
+                                <strong>${product.name}</strong>
+                                <span class="small" style="display:block;margin-top:3px;">${product.category === "women" ? "👩 Women" : "👨 Men"}</span>
+                                <span class="small">${product.price} DH</span>
+                            </div>
+                        </div>
+                        <button class="delete-btn" onclick="deleteProduct(${index})">Delete</button>
+                    </div>
+                `).join("");
+            } catch (error) { container.innerHTML = `<p style="color:#c1121f;">❌ Error: ${error.message}<br><span class="small">Check your token.</span></p>`; }
+        }
+    </script>
+</body>
+</html>

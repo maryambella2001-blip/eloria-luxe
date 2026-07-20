@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Eloria Luxe</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { padding: 30px 20px; }
+        .cart-wrap { max-width: 700px; margin: 40px auto 0; }
+        .cart-title { text-align: center; font-size: 32px; margin-bottom: 30px; background: linear-gradient(135deg, #D4AF37, #F5E6A8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .cart-item {
+            background: #161616;
+            padding: 18px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        .del-btn {
+            background: #c1121f;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .del-btn:hover { opacity: 0.85; }
+        .total-box {
+            margin-top: 25px;
+            font-size: 24px;
+            font-weight: bold;
+            background: #161616;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            text-align: right;
+            color: #D4AF37;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        .checkout-box {
+            background: #161616;
+            padding: 25px;
+            margin-top: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        .checkout-box h3 { margin-top: 0; margin-bottom: 15px; color: #D4AF37; }
+        .checkout-box input {
+            display: block;
+            width: 100%;
+            margin-bottom: 12px;
+            padding: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            font-size: 15px;
+            box-sizing: border-box;
+            background: #0a0a0a;
+            color: #f5f0e1;
+        }
+        .checkout-box input:focus { border-color: #D4AF37; outline: none; }
+        .checkout-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #D4AF37, #B8860B);
+            color: #0a0a0a;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .checkout-btn:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4); }
+        .checkout-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .empty-cart { text-align: center; padding: 60px 20px; color: #c9b896; background: #161616; border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.2); }
+        .empty-cart a { display: inline-block; margin-top: 20px; background: linear-gradient(135deg, #D4AF37, #B8860B); color: #0a0a0a; padding: 12px 30px; border-radius: 25px; text-decoration: none; font-weight: bold; }
+        .back-link { text-align: center; margin-top: 20px; }
+        .back-link a { color: #D4AF37; text-decoration: none; }
+        .item-info { line-height: 1.5; color: #f5f0e1; }
+    </style>
+</head>
+<body>
+
+    <div class="cart-wrap">
+        <h1 class="cart-title">🛒 Shopping Cart</h1>
+
+        <div id="content">
+            <div id="cart"></div>
+            <div class="total-box">Total: <span id="total">0</span> DH</div>
+            <div class="checkout-box">
+                <h3>📋 Checkout</h3>
+                <input id="name" type="text" placeholder="Full Name">
+                <input id="phone" type="tel" placeholder="Phone Number">
+                <input id="address" type="text" placeholder="Address">
+                <input id="city" type="text" placeholder="City">
+                <button class="checkout-btn" id="orderBtn" onclick="sendOrder()">💬 Confirm Order via WhatsApp</button>
+            </div>
+            <div class="back-link"><a href="index.html">← Continue Shopping</a></div>
+        </div>
+    </div>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const WHATSAPP_NUMBER = "212000000000"; // ← بدّل هاد الرقم برقمك واتساب
+
+        function renderCart() {
+            const cartDiv = document.getElementById("cart");
+            const totalEl = document.getElementById("total");
+            if (cart.length === 0) {
+                document.getElementById("content").innerHTML = `
+                    <div class="empty-cart">
+                        <h2>🛒 Cart is empty</h2>
+                        <p>You haven't added any fragrance yet</p>
+                        <a href="index.html">← Back to Shop</a>
+                    </div>`;
+                return;
+            }
+            let total = 0;
+            cartDiv.innerHTML = cart.map((item, index) => {
+                total += item.price;
+                let extra = "";
+                if (item.size) extra += `<p><strong>Size:</strong> ${item.size}</p>`;
+                return `
+                    <div class="cart-item">
+                        <div class="item-info">
+                            <h3 style="margin:0 0 5px;">${item.name}</h3>
+                            <p style="margin:0;"><strong>${item.price} DH</strong></p>
+                            ${extra}
+                        </div>
+                        <button class="del-btn" onclick="removeItem(${index})">Delete</button>
+                    </div>`;
+            }).join("");
+            totalEl.innerText = total;
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            localStorage.setItem("cart", JSON.stringify(cart));
+            renderCart();
+        }
+
+        function sendOrder() {
+            const name = document.getElementById("name").value.trim();
+            const phone = document.getElementById("phone").value.trim();
+            const address = document.getElementById("address").value.trim();
+            const city = document.getElementById("city").value.trim();
+
+            if (!name) { alert("Please enter your name!"); return; }
+            if (!phone) { alert("Please enter your phone number!"); return; }
+            if (!address) { alert("Please enter your address!"); return; }
+            if (cart.length === 0) { alert("Cart is empty!"); return; }
+
+            let message = `👑 *NEW ORDER - Eloria Luxe*\n\n`;
+            message += `👤 *Name:* ${name}\n`;
+            message += `📱 *Phone:* ${phone}\n`;
+            message += `📍 *Address:* ${address}\n`;
+            if (city) message += `🏙️ *City:* ${city}\n`;
+            message += `\n*🧴 Products:*\n`;
+
+            let total = 0;
+            cart.forEach((item, i) => {
+                message += `${i + 1}. ${item.name}`;
+                if (item.size) message += ` | ${item.size}`;
+                message += ` — *${item.price} DH*\n`;
+                total += item.price;
+            });
+            message += `\n💰 *Total: ${total} DH*\n\nThank you for your order! 🙏`;
+
+            const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+            const newWin = window.open(url, "_blank");
+            if (!newWin || newWin.closed || typeof newWin.closed == "undefined") {
+                window.location.href = url;
+            }
+
+            setTimeout(() => {
+                if (confirm("✅ WhatsApp opened!\n\nClear the cart now?")) {
+                    cart = [];
+                    localStorage.setItem("cart", JSON.stringify(cart));
+                    renderCart();
+                }
+            }, 1500);
+        }
+
+        renderCart();
+    </script>
+</body>
+</html>

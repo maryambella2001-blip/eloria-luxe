@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <title>Eloria Luxe</title>
+    <style>
+        .product-image { padding: 10px; background: #0a0a0a; }
+        .product-image img {
+            width: 100%;
+            height: 240px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+        .no-products, .loading { text-align: center; padding: 60px 20px; color: #c9b896; grid-column: 1/-1; }
+        hr { border: none; border-top: 1px solid rgba(212, 175, 55, 0.2); max-width: 1400px; margin: 20px auto; }
+    </style>
+</head>
+<body> 
+    <header>
+        <span style="font-size: 22px; font-weight: bold; background: linear-gradient(135deg, #D4AF37, #F5E6A8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px;">ELORIA LUXE</span>
+        
+        <ul id="nav-menu">
+            <li><a href="#sirves">Collection</a></li>
+            <li><a href="#aboutme">About</a></li>
+            <li><a href="#contacme">Contact</a></li>
+        </ul>
+        
+        <a href="card.html" class="cart-btn">🛒 Cart (<span id="cart-count">0</span>)</a>
+
+        <div class="header-hamburger" onclick="toggleHeaderMenu()"><i class="fas fa-bars"></i></div>
+    </header>
+    
+    <hr>
+
+    <section class="about" id="sirves">
+        <div class="hesob">
+            <h5>Luxury Fragrance</h5>
+            <h1>Eloria Luxe<br>Signature Scents</h1>
+            <p>Exquisite fragrances crafted for those who appreciate elegance</p>
+            <a href="#main-bnt" class="main-bnt">Shop Now <i class="fas fa-spray-can-sparkles"></i></a>
+        </div>
+        <div style="font-size: 180px; text-align: center;">👑</div>
+    </section>
+    
+    <hr>
+
+    <!-- تبويبات الكاطيغوري -->
+    <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; max-width:1400px; margin:20px auto; padding:0 20px;">
+        <button class="tab-btn tab-active" onclick="filterCategory('all', this)" style="background:#D4AF37;color:#0a0a0a;border:none;padding:12px 28px;border-radius:25px;cursor:pointer;font-weight:bold;font-size:15px;transition:0.2s;">🛍️ All</button>
+        <button class="tab-btn" onclick="filterCategory('men', this)" style="background:#1a1a1a;color:#D4AF37;border:1px solid rgba(212,175,55,0.4);padding:12px 28px;border-radius:25px;cursor:pointer;font-weight:bold;font-size:15px;transition:0.2s;">👨 Men</button>
+        <button class="tab-btn" onclick="filterCategory('women', this)" style="background:#1a1a1a;color:#D4AF37;border:1px solid rgba(212,175,55,0.4);padding:12px 28px;border-radius:25px;cursor:pointer;font-weight:bold;font-size:15px;transition:0.2s;">👩 Women</button>
+    </div>
+
+    <section class="products" id="main-bnt">
+        <!-- المنتجات كتجي هنا مباشرة -->
+    </section>
+    
+    <hr>
+
+    <section class="ismme" id="aboutme">
+        <h2>About Eloria Luxe</h2>
+        <p>Eloria Luxe brings you the finest selection of luxury fragrances. Each scent is carefully curated to deliver an unforgettable olfactory experience. Discover your signature scent with us.</p>
+    </section>
+    
+    <hr>
+
+    <section id="contacme" class="contact">
+        <div class="contactTitle">
+            <h1>CONTACT</h1>
+        </div>
+        <div class="contactme">
+            <div class="emaliAndphon">
+                <span style="font-size:24px;">📧</span>
+                <a href="mailto:contact@elorialuxe.com"><h3>contact@elorialuxe.com</h3></a>
+            </div>
+            <div class="emaliAndphon">
+                <span style="font-size:24px;">📱</span>
+                <a href="tel:+212000000000"><h3>+212 00 00 00 00</h3></a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        updateCount();
+
+        let allProducts = [];
+        let currentCategory = "all";
+
+        const RAW_BASE = "https://raw.githubusercontent.com/maryambella2001-blip/eloria-luxe/main/";
+        const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='240'><rect width='200' height='240' fill='%230a0a0a'/><text x='50%25' y='50%25' font-size='60' text-anchor='middle' dy='.3em'>👑</text></svg>";
+
+        // ⚠️ خاصك تبدل maryambella2001-blip و REPO برابط repo ديالك من بعد
+        const API_URL = "https://api.github.com/repos/maryambella2001-blip/REPO/contents/products.json?ref=main&t=";
+
+        function resolveImage(path) {
+            if (!path) return PLACEHOLDER;
+            if (path.startsWith("http") || path.startsWith("data:")) return path;
+            return RAW_BASE + path + "?t=" + Date.now();
+        }
+
+        function decodeBase64(b64) {
+            return decodeURIComponent(escape(atob(b64.replace(/\n/g, ""))));
+        }
+
+        async function loadProducts() {
+            const container = document.getElementById("main-bnt");
+            container.innerHTML = '<div class="loading">⏳ Loading fragrances...</div>';
+            let products = null;
+
+            try {
+                const r1 = await fetch(API_URL + Date.now() + Math.random(), { cache: "no-store" });
+                if (r1.ok) {
+                    const data = await r1.json();
+                    products = JSON.parse(decodeBase64(data.content));
+                }
+            } catch (e) { console.warn("API failed:", e.message); }
+
+            if (!products) {
+                try {
+                    const r2 = await fetch("products.json?t=" + Date.now(), { cache: "no-store" });
+                    if (r2.ok) products = await r2.json();
+                } catch (e) { console.warn("fallback failed:", e.message); }
+            }
+
+            if (!products || products.length === 0) {
+                allProducts = [];
+                container.innerHTML = `<div class="no-products"><h3>No fragrances yet 👑</h3><p>Add products from the Admin Panel</p></div>`;
+                return;
+            }
+
+            allProducts = products;
+            renderProducts();
+        }
+
+        function filterCategory(cat, btn) {
+            currentCategory = cat;
+            document.querySelectorAll(".tab-btn").forEach(b => {
+                b.style.background = "#1a1a1a";
+                b.style.color = "#D4AF37";
+            });
+            btn.style.background = "#D4AF37";
+            btn.style.color = "#0a0a0a";
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const container = document.getElementById("main-bnt");
+            let products = allProducts;
+            if (currentCategory !== "all") {
+                products = products.filter(p => (p.category || "men") === currentCategory);
+            }
+
+            if (!products || products.length === 0) {
+                container.innerHTML = `<div class="no-products"><h3>No fragrances in this category 👑</h3></div>`;
+                return;
+            }
+
+            container.innerHTML = products.map((p) => {
+                // المقاسات: الأحجام ديال العطور 50ml / 100ml
+                const sizes = ["50ml", "100ml"];
+                return `
+                <div class="card">
+                    <div class="product-image">
+                        <img src="${resolveImage(p.image)}" alt="${p.name}" onerror="this.src='${PLACEHOLDER}'">
+                    </div>
+                    <h3>${p.name}</h3>
+                    <div class="size-options">
+                        ${sizes.map(s => `<button class="size-btn" onclick="selectSize(this)">${s}</button>`).join("")}
+                    </div>
+                    <div class="price-cart">
+                        <span>${p.price} DH</span>
+                        <button onclick="addToCart(this)">Add to Cart</button>
+                    </div>
+                </div>
+                `;
+            }).join("");
+        }
+
+        function selectSize(el) {
+            const card = el.closest('.card');
+            card.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function addToCart(btn) {
+            const card = btn.closest('.card');
+            const name = card.querySelector('h3').innerText;
+            const price = parseInt(card.querySelector('.price-cart span').innerText);
+            const sel = card.querySelector('.size-btn.selected');
+            const size = sel ? sel.innerText : "50ml";
+            cart.push({ name, price, size });
+            localStorage.setItem("cart", JSON.stringify(cart));
+            updateCount();
+            card.querySelectorAll('.size-btn').forEach(c => c.classList.remove('selected'));
+        }
+
+        function updateCount() {
+            const el = document.getElementById("cart-count");
+            if (el) el.innerText = cart.length;
+        }
+
+        function toggleHeaderMenu() {
+            document.getElementById("nav-menu").classList.toggle("show");
+        }
+
+        window.onload = function() { loadProducts(); updateCount(); }
+    </script>
+</body>
+</html>
