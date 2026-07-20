@@ -381,7 +381,7 @@ header ul li a.active {
     
     .card h3 {
         font-size: 15px;
-        margin: 10px 8px 4px;
+        margin: 8px 8px 2px;
     }
     
     .price-cart span {
@@ -399,8 +399,12 @@ header ul li a.active {
         min-width: 30px;
     }
     
+    .size-options {
+        margin: 6px 0;
+    }
+    
     .product-image img {
-        height: 160px !important;
+        height: 130px !important;
     }
     
     .ismme {
