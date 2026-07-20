@@ -10,5 +10,11 @@
     "price": 30,
     "image": "images/product_1784585554658_131.jpg",
     "category": "men"
+  },
+  {
+    "name": "tki",
+    "price": 122,
+    "image": "images/product_1784585692620_65.jpeg",
+    "category": "men"
   }
 ]
