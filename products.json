@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "name": "tki",
+    "price": 50,
+    "image": "images/product_1784585526219_399.jpeg",
+    "category": "men"
+  }
+]
