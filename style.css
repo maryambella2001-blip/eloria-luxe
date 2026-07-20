@@ -303,8 +303,11 @@ header ul li a.active {
 /* ================= RESPONSIVE ================= */
 @media (max-width: 992px) {
     .about {
-        flex-direction: column;
+        flex-direction: column-reverse;
         text-align: center;
+        margin: 90px 15px 40px;
+        padding: 0 10px;
+        gap: 30px;
     }
     
     .products {
@@ -314,16 +317,65 @@ header ul li a.active {
 
 @media (max-width: 768px) {
     header {
-        padding: 15px 20px;
+        padding: 12px 15px;
         flex-wrap: wrap;
     }
     
+    .about {
+        margin: 85px 15px 30px;
+        padding: 0 5px;
+        gap: 25px;
+    }
+    
+    .hesob h5 {
+        font-size: 13px;
+        letter-spacing: 2px;
+        margin-bottom: 8px;
+    }
+    
     .hesob h1 {
-        font-size: 42px;
+        font-size: 32px;
+        margin-bottom: 15px;
+    }
+    
+    .hesob p {
+        font-size: 15px;
+        margin-bottom: 22px;
+    }
+    
+    .main-bnt {
+        padding: 12px 30px;
+        font-size: 14px;
+    }
+    
+    .heroimg {
+        max-width: 260px;
     }
     
     .products {
-        padding: 0 20px;
+        padding: 0 15px;
+    }
+    
+    .ismme {
+        margin: 40px 15px;
+        padding: 30px 20px;
+    }
+    
+    .ismme h2 {
+        font-size: 26px;
+    }
+    
+    .contact {
+        margin: 40px 15px;
+        padding: 25px 20px;
+    }
+    
+    .contactTitle h1 {
+        font-size: 30px;
+    }
+    
+    .contactme {
+        gap: 30px;
     }
     
     .header-hamburger {
@@ -334,7 +386,7 @@ header ul li a.active {
         display: none;
         flex-direction: column;
         position: absolute;
-        top: 70px;
+        top: 60px;
         left: 0;
         width: 100%;
         background: #0a0a0a;
