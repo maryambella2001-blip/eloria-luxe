@@ -97,7 +97,7 @@
         const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='240'><rect width='200' height='240' fill='%230a0a0a'/><text x='50%25' y='50%25' font-size='60' text-anchor='middle' dy='.3em'>👑</text></svg>";
 
         // ⚠️ خاصك تبدل maryambella2001-blip و REPO برابط repo ديالك من بعد
-        const API_URL = "https://api.github.com/repos/maryambella2001-blip/REPO/contents/products.json?ref=main&t=";
+        const API_URL = "https://api.github.com/repos/maryambella2001-blip/eloria-luxe/contents/products.json?ref=main&t=";
 
         function resolveImage(path) {
             if (!path) return PLACEHOLDER;
@@ -162,7 +162,11 @@
                 return;
             }
 
-            container.innerHTML = products.map((p) => {
+            container.innerHTML = `
+                <div style="grid-column:1/-1; text-align:center; padding:10px 0;">
+                    <button onclick="loadProducts()" style="background:linear-gradient(135deg,#D4AF37,#B8860B); color:#0a0a0a; border:none; padding:10px 25px; border-radius:25px; cursor:pointer; font-weight:bold;">🔄 تحديث المنتجات</button>
+                </div>
+            ` + products.map((p) => {
                 // المقاسات: الأحجام ديال العطور 50ml / 100ml
                 const sizes = ["50ml", "100ml"];
                 return `
