@@ -374,7 +374,33 @@ header ul li a.active {
     }
     
     .products {
-        padding: 0 15px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 0 12px;
+    }
+    
+    .card h3 {
+        font-size: 15px;
+        margin: 10px 8px 4px;
+    }
+    
+    .price-cart span {
+        font-size: 17px;
+    }
+    
+    .price-cart button {
+        padding: 7px 14px;
+        font-size: 12px;
+    }
+    
+    .size-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+        min-width: 30px;
+    }
+    
+    .product-image img {
+        height: 160px !important;
     }
     
     .ismme {
