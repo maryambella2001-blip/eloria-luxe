@@ -10,6 +10,7 @@ body {
     background: #0a0a0a;
     color: #f5f0e1;
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
 /* ================= HEADER ================= */
@@ -26,6 +27,14 @@ header {
     align-items: center;
     padding: 15px 40px;
     border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    box-sizing: border-box;
+    flex-wrap: nowrap;
+    gap: 10px;
+}
+
+header > span {
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .logo {
@@ -70,6 +79,8 @@ header ul li a.active {
     gap: 8px;
     transition: 0.3s;
     letter-spacing: 0.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .cart-btn:hover {
@@ -317,12 +328,22 @@ header ul li a.active {
 
 @media (max-width: 768px) {
     header {
-        padding: 12px 15px;
-        flex-wrap: wrap;
+        padding: 12px 12px;
+        flex-wrap: nowrap;
+    }
+    
+    header > span {
+        font-size: 15px !important;
+        letter-spacing: 1px !important;
+    }
+    
+    .cart-btn {
+        padding: 7px 12px;
+        font-size: 13px;
     }
     
     .about {
-        margin: 85px 15px 30px;
+        margin: 80px 15px 30px;
         padding: 0 5px;
         gap: 25px;
     }
