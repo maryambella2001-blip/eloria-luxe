@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "name": "You prfum",
+    "price": 122,
+    "image": "images/product_1784666014737_220.jpeg",
+    "category": "men"
+  }
+]
